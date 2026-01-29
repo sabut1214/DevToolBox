@@ -37,3 +37,36 @@ Main: https://example.com
     assert result.exit_code == 0
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     assert lines == ["docs.example.com", "example.com"]
+
+
+def test_extract_links_mailto_ftp(tmp_path):
+    sample = tmp_path / "sample.txt"
+    sample.write_text(
+        """
+Email: mailto:user@example.com
+FTP: ftp://example.com/resource
+""",
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(app, ["extract-links", str(sample)])
+
+    assert result.exit_code == 0
+    lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    assert lines == ["mailto:user@example.com", "ftp://example.com/resource"]
+
+
+def test_extract_links_no_unique(tmp_path):
+    sample = tmp_path / "sample.txt"
+    sample.write_text(
+        """
+Visit https://example.com and https://example.com again.
+""",
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(app, ["extract-links", str(sample), "--no-unique"])
+
+    assert result.exit_code == 0
+    lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    assert lines == ["https://example.com", "https://example.com"]

@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 import typer
 
-URL_PATTERN = re.compile(r"https?://[^\s\]\)>'\"}]+")
+URL_PATTERN = re.compile(r"(?:https?://|ftp://|mailto:)[^\s\]\)>'\"}]+")
 TRAILING_PUNCT = ".,);:]>\"'"
 
 
@@ -26,8 +26,11 @@ def extract_links(
     domain_only: bool = typer.Option(
         False, "--domain-only", help="Print only unique domains."
     ),
+    unique: bool = typer.Option(
+        True, "--unique/--no-unique", help="Deduplicate output."
+    ),
 ) -> None:
-    """Extract unique URLs from a file or stdin."""
+    """Extract URLs from a file or stdin."""
     try:
         text = _read_text(path)
     except FileNotFoundError:
@@ -35,16 +38,34 @@ def extract_links(
         raise typer.Exit(code=1)
 
     matches = URL_PATTERN.findall(text)
-    cleaned = {match.rstrip(TRAILING_PUNCT) for match in matches}
+    cleaned: list[str] = [match.rstrip(TRAILING_PUNCT) for match in matches]
+
+    def emit(values: list[str]) -> None:
+        if unique:
+            seen: set[str] = set()
+            for value in values:
+                if value in seen:
+                    continue
+                seen.add(value)
+                typer.echo(value)
+            return
+        for value in values:
+            typer.echo(value)
 
     if domain_only:
-        domains = {urlparse(url).netloc for url in cleaned if urlparse(url).netloc}
-        for domain in sorted(domains):
-            typer.echo(domain)
+        domains: list[str] = []
+        for url in cleaned:
+            parsed = urlparse(url)
+            if parsed.scheme == "mailto":
+                if "@" in parsed.path:
+                    domains.append(parsed.path.split("@")[-1])
+                continue
+            if parsed.netloc:
+                domains.append(parsed.netloc)
+        emit(domains)
         return
 
-    for url in sorted(cleaned):
-        typer.echo(url)
+    emit(cleaned)
 
 
 def register(app: typer.Typer) -> None:

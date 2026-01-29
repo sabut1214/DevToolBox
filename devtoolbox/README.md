@@ -33,6 +33,8 @@ dt fmt-json data.json
 cat data.json | dt fmt-json
 
 dt fmt-json data.json --in-place
+dt fmt-json data.json --indent 4 --no-sort-keys
+dt fmt-json logs.jsonl --jsonl
 ```
 
 ### slugify
@@ -40,6 +42,8 @@ dt fmt-json data.json --in-place
 ```bash
 dt slugify "Hello, World!"
 dt slugify "Hello World" --max-len 5
+dt slugify "Hello World" --separator "_"
+dt slugify "नमस्ते World" --no-ascii-only
 ```
 
 ### extract-links
@@ -48,6 +52,7 @@ dt slugify "Hello World" --max-len 5
 dt extract-links README.md
 
 dt extract-links notes.txt --domain-only
+dt extract-links notes.txt --no-unique
 ```
 
 ### batch-rename
