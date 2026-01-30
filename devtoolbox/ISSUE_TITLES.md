@@ -17,3 +17,4 @@ Format: Title — Labels
 13) `img-resize` allow recursive folder traversal — type:feature
 14) Improve error messages for missing dependencies — type:docs
 15) Add `--version` output to CLI — type:feature
+

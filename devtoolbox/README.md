@@ -61,6 +61,7 @@ dt extract-links notes.txt --no-unique
 dt batch-rename ./photos --prefix img_ --start 1
 
 dt batch-rename ./photos --prefix img_ --dry-run
+dt batch-rename ./photos --prefix img_ --padding 3 --ext .png --ext .jpg
 ```
 
 ### md-to-pdf
@@ -69,6 +70,7 @@ dt batch-rename ./photos --prefix img_ --dry-run
 dt md-to-pdf docs/guide.md
 
 dt md-to-pdf docs/guide.md --output docs/guide.pdf
+dt md-to-pdf docs/guide.md --css docs/style.css --title "Guide"
 ```
 
 ### img-resize
@@ -77,6 +79,7 @@ dt md-to-pdf docs/guide.md --output docs/guide.pdf
 dt img-resize logo.png --width 200
 
 dt img-resize ./images --width 800 --height 600 --keep-aspect
+dt img-resize ./images --width 800 --format jpg --recursive
 ```
 
 ## Screenshots / GIF

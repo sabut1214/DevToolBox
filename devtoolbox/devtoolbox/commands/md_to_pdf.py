@@ -12,6 +12,12 @@ def md_to_pdf(
     output: Path | None = typer.Option(
         None, "--output", "-o", help="Output PDF path."
     ),
+    css: Path | None = typer.Option(
+        None, "--css", help="Path to a custom CSS file."
+    ),
+    title: str | None = typer.Option(
+        None, "--title", help="Override document title."
+    ),
 ) -> None:
     """Convert a Markdown file to PDF."""
     if not input_path.exists():
@@ -21,16 +27,27 @@ def md_to_pdf(
     try:
         import markdown
     except ImportError:
-        typer.echo("Missing dependency: markdown", err=True)
+        typer.echo(
+            "Missing dependency: markdown. Install with: pip install markdown", err=True
+        )
         raise typer.Exit(code=1)
 
     try:
         from weasyprint import HTML
     except ImportError:
-        typer.echo("Missing dependency: weasyprint", err=True)
+        typer.echo(
+            "Missing dependency: weasyprint. Install with: pip install weasyprint",
+            err=True,
+        )
         raise typer.Exit(code=1)
 
     text = input_path.read_text(encoding="utf-8")
+    css_text = ""
+    if css is not None:
+        if not css.exists():
+            typer.echo(f"CSS file not found: {css}", err=True)
+            raise typer.Exit(code=1)
+        css_text = css.read_text(encoding="utf-8")
     html_body = markdown.markdown(
         text,
         extensions=["extra", "tables", "fenced_code"],
@@ -40,12 +57,13 @@ def md_to_pdf(
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>{input_path.stem}</title>
+  <title>{title or input_path.stem}</title>
   <style>
     body {{ font-family: sans-serif; line-height: 1.6; padding: 24px; }}
     code {{ font-family: monospace; }}
     pre {{ background: #f6f8fa; padding: 12px; overflow-x: auto; }}
     h1, h2, h3 {{ margin-top: 24px; }}
+    {css_text}
   </style>
 </head>
 <body>
